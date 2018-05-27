@@ -10,7 +10,11 @@ public class JDCBExample {
 
     public static void main(String[] args) {
         Connection connection = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement  = null;
+        CallableStatement callableStatement = null;
+        String updateQuery = "UPDATE `city` SET `Population`= ? WHERE `id` = ?";
+        String filmInStockQuery  = "{call film_in_stock(?,?,?)}";
+
 
         try {
             //Driver registration
@@ -18,27 +22,20 @@ public class JDCBExample {
 
             //Open connection
             connection = DriverManager.getConnection(DB, USER, PASSWORD);
-            statement = connection.createStatement();
+            preparedStatement =  connection.prepareStatement(updateQuery);
+            callableStatement = connection.prepareCall(filmInStockQuery);
 
-            //Execute query
-            String sqlQuery = "SELECT * FROM city";
-            ResultSet rs = statement.executeQuery(sqlQuery);
+            preparedStatement.setInt(1, 1000500);
+            preparedStatement.setInt(2, 1);
 
-            System.out.println("ID\tNAME\tCODE\tDistrict\tPopulation");
-            while (rs.next()) {
-                int id = rs.getInt(1);
-                String name = rs.getString(2);
-                String code = rs.getString(3);
-                String district = rs.getString(4);
-                int pop = rs.getInt(5);
+            callableStatement.setInt(1, 10);
+            callableStatement.setInt(2, 5);
+            int fRes =  callableStatement.getInt(3);
 
+            int rows = preparedStatement.executeUpdate();
+            System.out.println("rows = "+rows);
 
-                System.out.println(id + "\t" + name + "\t" + code + "\t" + district + "\t" + pop);
-            }
-
-
-            rs.close();
-            statement.close();
+            preparedStatement.close();
             connection.close();
 
         } catch (ClassNotFoundException e) {
